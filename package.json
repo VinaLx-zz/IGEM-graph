@@ -1,0 +1,32 @@
+{
+  "name": "igem-graph",
+  "version": "1.0.0",
+  "description": "igem collaboration project",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc -p ./src/backend/ && webpack",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run build && npm run serve",
+    "serve": "node build/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VinaLx/IGEM-graph.git"
+  },
+  "author": "vinalx",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/VinaLx/IGEM-graph/issues"
+  },
+  "homepage": "https://github.com/VinaLx/IGEM-graph#readme",
+  "dependencies": {
+    "@types/d3": "^4.10.1",
+    "@types/express": "^4.0.37",
+    "d3": "^4.11.0",
+    "express": "^4.16.2"
+  },
+  "devDependencies": {
+    "ts-loader": "^2.3.7",
+    "typescript": "^2.5.3"
+  }
+}
