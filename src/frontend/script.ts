@@ -1,5 +1,6 @@
 /* tslint:disable:interface-name no-console no-var-requires */
 import * as d3 from "d3";
+import * as Const from "./constants";
 
 type DirectSelect<E extends d3.BaseType> =
     d3.Selection<E, {}, HTMLElement, any>;
@@ -95,7 +96,19 @@ function InitNodeSelection<E extends d3.BaseType>(
             .on("start", dragstarted)
             .on("drag", dragged)
             .on("end", dragended));
-    node.append("title").text((d) => d.name);
+
+    node.on("mouseover", function() {
+        d3.select(this)
+            .transition()
+            .duration(Const.kNodeTransDuration)
+            .attr("r", Const.kNodeHoverRadius);
+    }).on("mouseout", function() {
+        d3.select(this)
+            .transition()
+            .duration(Const.kNodeTransDuration)
+            .attr("r", Const.kNodeOriginalRadius);
+    });
+    // node.append("title").text((d) => d.name);
     return node;
 }
 
