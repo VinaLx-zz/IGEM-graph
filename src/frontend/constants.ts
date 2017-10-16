@@ -1,22 +1,25 @@
-import * as d3 from "d3";
+/* tslint:disable: no-namespace */
 
-export const kRadiusExpand = 1.5;
-export const kNodeTransDuration = 250;
+namespace Const {
 
-const kLinkDistanceF = 0.05;
-export let kNodeRadius = -1;
+    export const kRadiusExpand = 1.5;
+    export const kNodeTransDuration = 250;
 
-const kNodeRadiusF = 0.013;
-export let kLinkDistance = -1;
+    const kLinkDistanceF = 0.05;
+    export let kNodeRadius = -1;
 
-export function InitSizes(width: number, height: number) {
-    const min = width < height ? width : height;
-    kNodeRadius = kNodeRadiusF * min;
-    kLinkDistance = kLinkDistanceF * min;
-}
+    const kNodeRadiusF = 0.013;
+    export let kLinkDistance = -1;
 
-const ordinal = d3.scaleOrdinal(d3.schemeCategory20);
+    export function InitSizes(width: number, height: number) {
+        const min = width < height ? width : height;
+        kNodeRadius = kNodeRadiusF * min;
+        kLinkDistance = kLinkDistanceF * min;
+    }
 
-export function Color(n: number) {
-    return ordinal(String(n));
+    const ordinal = d3.scaleOrdinal(d3.schemeCategory20);
+
+    export function Color(n: number) {
+        return ordinal(String(n));
+    }
 }

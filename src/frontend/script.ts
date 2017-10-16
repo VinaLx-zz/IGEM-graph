@@ -1,6 +1,4 @@
 /* tslint:disable:interface-name no-console no-var-requires space-before-function-paren */
-import * as d3 from "d3";
-import * as Const from "./constants";
 
 type DirectSelect<E extends d3.BaseType> =
     d3.Selection<E, {}, HTMLElement, any>;

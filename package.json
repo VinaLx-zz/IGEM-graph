@@ -4,7 +4,7 @@
   "description": "igem collaboration project",
   "main": "index.js",
   "scripts": {
-    "build": "tsc -p ./src/backend/ && webpack",
+    "build": "tsc -p ./src/backend/ && tsc -p ./src/frontend",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run build && npm run serve",
     "serve": "node build/app.js"
@@ -24,12 +24,9 @@
     "@types/d3": "^4.10.1",
     "@types/express": "^4.0.37",
     "@types/jquery": "^3.2.13",
-    "d3": "^4.11.0",
     "express": "^4.16.2"
   },
   "devDependencies": {
-    "ts-loader": "^2.3.7",
-    "typescript": "^2.5.3",
-    "webpack": "^3.6.0"
+    "typescript": "^2.5.3"
   }
 }
