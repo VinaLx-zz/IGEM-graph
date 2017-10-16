@@ -28,20 +28,12 @@ interface InputJson {
     links: Array<{ source: number, target: number, value: number }>;
 }
 
-const svg = d3.select("svg");
-const width = Number(svg.attr("width"));
-const height = Number(svg.attr("height"));
-
-const color = d3.scaleOrdinal(d3.schemeCategory20);
-
 function InitForceSimulation([cx, cy]: [number, number]) {
     return d3.forceSimulation<GraphNode, GraphLink>()
         .force("link", d3.forceLink<GraphNode, GraphLink>().id((d) => String(d.id)))
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(cx, cy));
 }
-
-const simulation = InitForceSimulation([width / 2, height / 2]);
 
 function InputJsonToGraph(j: InputJson): Graph {
     const nodes = Array<GraphNode>();
@@ -59,26 +51,6 @@ function InitLinkSelection<E extends d3.BaseType>(
         .append("line").attr("stroke-width", (d) => Math.sqrt(d.value));
     return linkSelection;
 }
-function dragstarted(d: GraphNode) {
-    if (!d3.event.active) {
-        simulation.alphaTarget(0.3).restart();
-    }
-    d.fx = d.x;
-    d.fy = d.y;
-}
-
-function dragged(d: GraphNode) {
-    d.fx = d3.event.x;
-    d.fy = d3.event.y;
-}
-
-function dragended(d: GraphNode) {
-    if (!d3.event.active) {
-        simulation.alphaTarget(0);
-    }
-    d.fx = null;
-    d.fy = null;
-}
 
 function ElementAjacencyArray<E extends d3.BaseType, PE extends d3.BaseType, PD>(
     n: number, links: d3.Selection<E, GraphLink, PE, PD>): E[][] {
@@ -93,20 +65,41 @@ function ElementAjacencyArray<E extends d3.BaseType, PE extends d3.BaseType, PD>
     return graph;
 }
 
+function InitNodeDrag<E extends d3.BaseType, PE extends d3.BaseType, PD>(
+    node: d3.Selection<E, GraphNode, PE, PD>,
+    sim: d3.Simulation<GraphNode, GraphLink>) {
+    node.call(d3.drag<any, GraphNode>()
+        .on("start", (d: GraphNode) => {
+            if (!d3.event.active) {
+                sim.alphaTarget(0.3).restart();
+            }
+            d.fx = d.x;
+            d.fy = d.y;
+        })
+        .on("drag", (d: GraphNode) => {
+            d.fx = d3.event.x;
+            d.fy = d3.event.y;
+        })
+        .on("end", (d: GraphNode) => {
+            if (!d3.event.active) {
+                sim.alphaTarget(0);
+            }
+            d.fx = null;
+            d.fy = null;
+        }));
+}
+
 function InitNodeSelection<E extends d3.BaseType>(
-    selectedSVG: DirectSelect<E>, nodes: GraphNode[]) {
+    selectedSVG: DirectSelect<E>, sim: d3.Simulation<GraphNode, GraphLink>, nodes: GraphNode[]) {
     const circleNode = selectedSVG.append("g").attr("class", "nodes")
         .selectAll("a").data(nodes).enter()
         .append("a").attr("href", (d) => d.url).attr("target", "_blank")
         .append("circle")
         .attr("r", 7).attr("fill", (d) => d3.schemeCategory20[d.group])
         .attr("data-toggle", "tooltip")
-        .attr("title", (d) => d.name)
-        .call(d3.drag<any, GraphNode>()
-            .on("start", dragstarted)
-            .on("drag", dragged)
-            .on("end", dragended));
+        .attr("title", (d) => d.name);
 
+    InitNodeDrag(circleNode, sim);
     DeleteLinksFromTopics(circleNode);
     return circleNode;
 }
@@ -165,7 +158,7 @@ type CommonSelect<D> = d3.Selection<d3.BaseType, D, d3.BaseType, {}>;
 function ConnectModelAndView(
     sim: d3.Simulation<GraphNode, GraphLink>,
     nodes: CommonSelect<GraphNode>, links: CommonSelect<GraphLink>) {
-    simulation.on("tick", () => {
+    sim.on("tick", () => {
         links
             .attr("x1", (d: any) => d.source.x)
             .attr("y1", (d: any) => d.source.y)
@@ -177,9 +170,10 @@ function ConnectModelAndView(
     });
 }
 
-function DrawForceGraph(graph: Graph) {
+function DrawForceGraph<E extends d3.BaseType>(
+    svg: DirectSelect<E>, simulation: d3.Simulation<GraphNode, GraphLink>, graph: Graph) {
     const links = InitLinkSelection(svg, graph.links);
-    const nodes = InitNodeSelection(svg, graph.nodes);
+    const nodes = InitNodeSelection(svg, simulation, graph.nodes);
 
     const ajacencyArray = ElementAjacencyArray(nodes.size(), links);
 
@@ -202,9 +196,16 @@ function EnableSVGTooltip() {
     });
 }
 
-d3.json("graph2009-url.json", (error, json: InputJson) => {
-    if (error) {
-        throw error;
-    }
-    DrawForceGraph(InputJsonToGraph(json));
-});
+function CaptureSVGElemAndDraw() {
+    const svg = d3.select("svg.graph");
+    const [w, h] = [Number(svg.attr("width")), Number(svg.attr("height"))];
+    const simulation = InitForceSimulation([w / 2, h / 2]);
+    d3.json(svg.attr("config"), (error, json: InputJson) => {
+        if (error) {
+            throw error;
+        }
+        DrawForceGraph(svg, simulation, InputJsonToGraph(json));
+    });
+}
+
+CaptureSVGElemAndDraw();
