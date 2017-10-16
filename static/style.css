@@ -6,5 +6,4 @@
 .nodes circle {
     stroke: #fff;
     stroke-width: 1.5px;
-    transition: stroke 0.8s ease;
 }
