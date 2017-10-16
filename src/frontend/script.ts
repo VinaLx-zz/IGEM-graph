@@ -95,7 +95,8 @@ function InitNodeSelection<E extends d3.BaseType>(
         .selectAll("a").data(nodes).enter()
         .append("a").attr("href", (d) => d.url).attr("target", "_blank")
         .append("circle")
-        .attr("r", 7).attr("fill", (d) => d3.schemeCategory20[d.group])
+        .attr("r", Const.kNodeRadius)
+        .attr("fill", (d) => Const.Color(d.group))
         .attr("data-toggle", "tooltip")
         .attr("title", (d) => d.name);
 
@@ -115,21 +116,22 @@ function DeleteLinksFromTopics<E extends d3.BaseType, PE extends d3.BaseType, PD
 
 function NodeHoverEffect<E extends d3.BaseType, PE extends d3.BaseType, PD>(
     nodes: d3.Selection<E, GraphNode, PE, PD>, aa: E[][]) {
+    const nodeHoverRadius = Const.kNodeRadius * Const.kRadiusExpand;
     nodes.on("mouseover", function (d) {
         d3.select(this)
             .transition()
             .duration(Const.kNodeTransDuration)
-            .attr("r", Const.kNodeHoverRadius);
+            .attr("r", nodeHoverRadius);
         d3.selectAll(aa[d.id])
             .transition()
             .duration(Const.kNodeTransDuration)
-            .style("stroke", "#000")
+            .style("stroke", "#111")
             .style("stroke-width", "2px");
     }).on("mouseout", function (d) {
         d3.select(this)
             .transition()
             .duration(Const.kNodeTransDuration)
-            .attr("r", Const.kNodeOriginalRadius);
+            .attr("r", Const.kNodeRadius);
         d3.selectAll(aa[d.id])
             .transition()
             .duration(Const.kNodeTransDuration)
@@ -150,7 +152,7 @@ function SetSimulationLinks(
         console.error("get force simulation fail");
         return;
     }
-    linkForce.links(links).distance((l) => 50 / l.value);
+    linkForce.links(links).distance((l) => Const.kLinkDistance / l.value);
 }
 
 type CommonSelect<D> = d3.Selection<d3.BaseType, D, d3.BaseType, {}>;
@@ -200,6 +202,7 @@ function CaptureSVGElemAndDraw() {
     const svg = d3.select("svg.graph");
     const [w, h] = [Number(svg.attr("width")), Number(svg.attr("height"))];
     const simulation = InitForceSimulation([w / 2, h / 2]);
+    Const.InitSizes(w, h);
     d3.json(svg.attr("config"), (error, json: InputJson) => {
         if (error) {
             throw error;
